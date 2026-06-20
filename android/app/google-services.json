@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "393867748061",
+    "project_id": "gamerootdata",
+    "storage_bucket": "gamerootdata.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393867748061:android:767a38b25d5c7cbb6d7134",
+        "android_client_info": {
+          "package_name": "com.example.gameroot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9hn99j40xdL9frpF_wIsG7Z_41jXhv2s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
