@@ -119,6 +119,9 @@ firepit-log.txt
 *.pem
 *.p12
 
+# Credenciais
+lib/core/utils/chaves_secretas.dart
+
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
