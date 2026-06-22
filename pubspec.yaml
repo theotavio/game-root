@@ -1,5 +1,5 @@
 name: gameroot
-description: "A new Flutter project."
+description: "Um sistema de vendas de jogos eletrônicos"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -27,22 +27,23 @@ dependencies:
 
   # Geolocalização
   geolocator: ^14.0.3
-  geocoding: ^4.0.0
 
-  # Logo vetorizada
+  # Preferências locais
+  shared_preferences: ^2.3.0
+
+  # UI
   flutter_svg: ^2.0.10+1
+  google_fonts: ^8.1.0
+  cached_network_image: ^3.3.1
 
   # Som da splash screen
   audioplayers: ^6.0.0
 
   # Formatação e máscaras de campos
-  mask_text_input_formatter: ^2.9.0
+  intl: ^0.20.2
 
-  # Tipografia
-  google_fonts: ^8.1.0
-
-  # Permissões
-  permission_handler: ^12.0.3
+  # API IGDB
+  http: ^1.2.1
 
   # Geração de identificadores únicos
   uuid: ^4.3.3
@@ -53,3 +54,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/sounds/
+    - assets/icones/
