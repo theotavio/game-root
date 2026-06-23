@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/cores_app.dart';
 
-class TemaApp {
+class TemaApp{
   TemaApp._();
 
   static ThemeData get temaClaro{
