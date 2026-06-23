@@ -1,7 +1,7 @@
 import 'dart:math';
 
-class GeradoreCodigo{
-  GeradoreCodigo._();
+class GeradorCodigo{
+  GeradorCodigo._();
 
   static final Random _aleatorio = Random.secure();
 
