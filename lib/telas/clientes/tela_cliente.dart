@@ -15,7 +15,7 @@ class TelaClientes extends StatelessWidget{
     return Scaffold(
       appBar: AppBar(title: const Text('Clientes')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).pushNamed(RotasApp.formularioClientes),
+        onPressed: () => Navigator.of(context).pushNamed(RotasApp.formularioCliente),
         child: const Icon(Icons.person_add_alt),
       ),
       body: ListView.builder(
@@ -33,7 +33,7 @@ class TelaClientes extends StatelessWidget{
               trailing: PopupMenuButton<String>(
                 onSelected: (opcao){
                   if(opcao == 'editar')
-                    Navigator.of(context).pushNamed(RotasApp.formularioClientes, arguments: cliente);
+                    Navigator.of(context).pushNamed(RotasApp.formularioCliente, arguments: cliente);
                   else if(opcao == 'excluir')
                     _confirmarExclusao(context, cliente);
                 },

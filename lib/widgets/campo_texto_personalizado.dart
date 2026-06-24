@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CampoTextoPersonalizado extends StatelessWidget{
   final TextEditingController controlador;
@@ -8,6 +9,7 @@ class CampoTextoPersonalizado extends StatelessWidget{
   final TextInputType? tipoTeclado;
   final int linhas;
   final String? Function(String?)? validador;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CampoTextoPersonalizado({
     super.key,
@@ -18,6 +20,7 @@ class CampoTextoPersonalizado extends StatelessWidget{
     this.tipoTeclado,
     this.linhas = 1,
     this.validador,
+    this.inputFormatters,
   });
 
   @override
@@ -27,6 +30,7 @@ class CampoTextoPersonalizado extends StatelessWidget{
       obscureText: obscurecer,
       keyboardType: tipoTeclado,
       maxLines: obscurecer ? 1 : linhas,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(labelText: rotulo, suffixIcon: sufixo),
       validator: validador,
     );

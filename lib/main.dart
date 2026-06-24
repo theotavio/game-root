@@ -20,6 +20,8 @@ import 'telas/produtos/tela_formulario_produto.dart';
 import 'telas/clientes/tela_cliente.dart';
 import 'telas/clientes/tela_formulario_cliente.dart';
 import 'telas/vendas/tela_vendas.dart';
+import 'telas/vendas/tela_historico.dart';
+import 'telas/vendas/tela_historico_cliente.dart';
 import 'models/produto_modelo.dart';
 import 'models/cliente_modelo.dart';
 
@@ -76,7 +78,7 @@ class GameRootApp extends StatelessWidget{
               );
             case RotasApp.clientes:
               return MaterialPageRoute(builder: (_) => const TelaClientes());
-            case RotasApp.formularioClientes:
+            case RotasApp.formularioCliente:
               return MaterialPageRoute(
                 builder: (_) => TelaFormularioCliente(
                     clienteParaEditar:
@@ -84,6 +86,10 @@ class GameRootApp extends StatelessWidget{
               );
             case RotasApp.vendas:
               return MaterialPageRoute(builder: (_) => const TelaVendas());
+            case RotasApp.historico:
+              return MaterialPageRoute(builder: (_) => const TelaHistorico());
+            case RotasApp.historicoCliente:
+              return MaterialPageRoute(builder: (_) => TelaHistoricoCliente(cliente: configuracao.arguments as ClienteModelo));
             default:
               return MaterialPageRoute(builder: (_) => const TelaSplash());
           }

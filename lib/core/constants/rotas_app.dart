@@ -10,6 +10,8 @@ class RotasApp{
   static const String produtos = '/produtos';
   static const String formularioProduto = '/produtos/formulario';
   static const String clientes = '/clientes';
-  static const String formularioClientes = '/clientes/formulario';
+  static const String formularioCliente = '/clientes/formulario';
   static const String vendas = '/vendas';
+  static const String historico = '/historico';
+  static const String historicoCliente = '/historico-cliente';
 }

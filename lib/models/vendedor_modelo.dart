@@ -30,7 +30,7 @@ class VendedorModelo{
     'nome': nome,
     'email': email,
     'telefone': telefone,
-    'nivel': nivel,
+    'nivel': nivel.rotulo,
     'loginBiometricoAtivo': loginBiometricoAtivo,
   };
 

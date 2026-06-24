@@ -58,8 +58,8 @@ class _TelaLoginState extends State<TelaLogin>{
     else
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text(provedor.mensagemErro ?? 'Não foi possível autenticar')),
+          content: Text(provedor.mensagemErro ?? 'Não foi possível autenticar'),
+        ),
       );
   }
 
@@ -72,7 +72,14 @@ class _TelaLoginState extends State<TelaLogin>{
 
   @override
   Widget build(BuildContext context){
-    final carregando = context.watch<AutenticacaoProvedor>().carregando;
+    final provedor = context.watch<AutenticacaoProvedor>();
+    final carregando = provedor.carregando;
+
+    if(!provedor.inicializado){
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -101,23 +108,29 @@ class _TelaLoginState extends State<TelaLogin>{
                   rotulo: 'Senha',
                   obscurecer: !_senhaVisivel,
                   sufixo: IconButton(
-                    icon: Icon(
-                        _senhaVisivel ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
+                    icon: Icon(_senhaVisivel
+                        ? Icons.visibility_off
+                        : Icons.visibility),
+                    onPressed: () =>
+                        setState(() => _senhaVisivel = !_senhaVisivel),
                   ),
                   validador: Validadores.validarSenha,
                 ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => Navigator.of(context).pushNamed(RotasApp.recuperarSenha),
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(RotasApp.recuperarSenha),
                     child: const Text('Esqueci minha senha'),
                   ),
                 ),
                 const SizedBox(height: 12),
                 BotaoPersonalizado(
-                    texto: 'Entrar', carregando: carregando, aoPressionar: _entrar),
-                if(_biometriaAtiva) ...[
+                  texto: 'Entrar',
+                  carregando: carregando,
+                  aoPressionar: _entrar,
+                ),
+                if (provedor.inicializado && _biometriaAtiva) ...[
                   const SizedBox(height: 16),
                   OutlinedButton.icon(
                     onPressed: _entrarComBiometria,
@@ -127,7 +140,8 @@ class _TelaLoginState extends State<TelaLogin>{
                 ],
                 const SizedBox(height: 24),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pushNamed(RotasApp.cadastroVendedor),
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed(RotasApp.cadastroVendedor),
                   child: const Text('Não tem conta? Cadastre-se'),
                 ),
               ],

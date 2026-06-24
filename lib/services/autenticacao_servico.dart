@@ -16,7 +16,7 @@ class AutenticacaoServico{
   Future<UserCredential> cadastrarVendedor({
     required String email,
     required String senha,
-  }) {
+  }){
     return _auth.createUserWithEmailAndPassword(email: email, password: senha);
   }
 
@@ -25,4 +25,18 @@ class AutenticacaoServico{
   }
 
   Future<void> sair() => _auth.signOut();
+
+  Future<User?> aguardarUsuarioAtual() async{
+  if(_auth.currentUser != null) 
+    return _auth.currentUser;
+  
+  return await _auth
+      .authStateChanges()
+      .where((u) => u != null)
+      .first
+      .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => null,
+      );
+}
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import '../../models/vendedor_modelo.dart';
 import '../../core/constants/rotas_app.dart';
 import '../../core/utils/validadores.dart';
@@ -85,11 +86,15 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor> {
                   validador: Validadores.validarEmail,
                 ),
                 const SizedBox(height: 16),
-                CampoTextoPersonalizado(
-                  controlador: _telefoneControlador,
-                  rotulo: 'Telefone',
-                  tipoTeclado: TextInputType.phone,
-                  validador: Validadores.validarTelefone,
+                TextFormField(
+                  controller: _telefoneControlador,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Telefone'),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    _TelefoneFormatter(),
+                  ],
+                  validator: Validadores.validarTelefone,
                 ),
                 const SizedBox(height: 16),
                 CampoTextoPersonalizado(
@@ -119,6 +124,29 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TelefoneFormatter extends TextInputFormatter{
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue anterior, TextEditingValue novo){
+    final digitos = novo.text.replaceAll(RegExp(r'\D'), '');
+    final buffer = StringBuffer();
+    for(int i = 0; i < digitos.length && i < 11; i++){
+      if(i == 0) 
+        buffer.write('(');
+      if(i == 2) 
+        buffer.write(') ');
+      if(i == 7) 
+        buffer.write('-');
+      buffer.write(digitos[i]);
+    }
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
     );
   }
 }

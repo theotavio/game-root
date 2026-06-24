@@ -4,20 +4,18 @@ import '../../core/constants/cores_app.dart';
 import '../../core/constants/rotas_app.dart';
 import '../../providers/autenticacao_provedor.dart';
 
-class TelaInicial extends StatelessWidget {
+class TelaInicial extends StatelessWidget{
   const TelaInicial({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     final provedor = context.watch<AutenticacaoProvedor>();
     final vendedor = provedor.vendedorLogado;
 
-    // Aguarda carregar o vendedor do Firestore
-    if (vendedor == null) {
+    if(vendedor == null)
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -25,8 +23,7 @@ class TelaInicial extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () =>
-                Navigator.of(context).pushNamed(RotasApp.configuracoes),
+            onPressed: () => Navigator.of(context).pushNamed(RotasApp.configuracoes),
           ),
         ],
       ),
@@ -40,28 +37,35 @@ class TelaInicial extends StatelessWidget {
             _CartaoMenu(
               icone: Icons.people_alt_outlined,
               titulo: 'Clientes',
-              onTap: () => Navigator.of(context).pushNamed(RotasApp.clientes),
+              onTap: () =>
+                  Navigator.of(context).pushNamed(RotasApp.clientes),
             ),
             _CartaoMenu(
               icone: Icons.videogame_asset_outlined,
               titulo: 'Produtos',
               habilitado: vendedor.podeGerenciarProdutos,
-              onTap: () => Navigator.of(context).pushNamed(RotasApp.produtos),
+              onTap: () =>
+                  Navigator.of(context).pushNamed(RotasApp.produtos),
             ),
             _CartaoMenu(
               icone: Icons.point_of_sale_outlined,
               titulo: 'Vendas',
-              onTap: () => Navigator.of(context).pushNamed(RotasApp.vendas),
+              onTap: () =>
+                  Navigator.of(context).pushNamed(RotasApp.vendas),
+            ),
+            _CartaoMenu(
+              icone: Icons.history_outlined,
+              titulo: 'Histórico',
+              onTap: () =>
+                  Navigator.of(context).pushNamed(RotasApp.historico),
             ),
             _CartaoMenu(
               icone: Icons.logout,
               titulo: 'Sair',
-              onTap: () async {
+              onTap: () async{
                 await context.read<AutenticacaoProvedor>().sair();
-                if (context.mounted) {
-                  Navigator.of(context)
-                      .pushNamedAndRemoveUntil(RotasApp.login, (_) => false);
-                }
+                if(context.mounted)
+                  Navigator.of(context).pushNamedAndRemoveUntil(RotasApp.login, (_) => false);
               },
             ),
           ],
@@ -85,7 +89,7 @@ class _CartaoMenu extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return Opacity(
       opacity: habilitado ? 1 : 0.4,
       child: Card(

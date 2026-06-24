@@ -24,9 +24,13 @@ dependencies:
 
   # Biometria e reconhecimento facil nativo
   local_auth: ^3.0.1
+  local_auth_android: ^2.0.0
+  local_auth_darwin: ^2.0.0
+  flutter_secure_storage: ^10.3.1
 
   # Geolocalização
   geolocator: ^14.0.3
+  geocoding: ^4.0.0
 
   # Preferências locais
   shared_preferences: ^2.3.0

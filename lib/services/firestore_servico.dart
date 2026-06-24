@@ -142,4 +142,23 @@ Future<VendedorModelo> criarVendedor({
     for(final item in venda.itens)
       await darBaixaEstoque(item.produto.codigo, item.quantidade);
   }
+
+  Future<List<Map<String, dynamic>>> buscarVendasPorCliente(
+      String clienteId) async {
+    final snap = await _vendas
+        .where('clienteId', isEqualTo: clienteId)
+        .get();
+
+    final lista = snap.docs
+        .map((d) => d.data() as Map<String, dynamic>)
+        .toList();
+
+    lista.sort((a, b){
+      final dataA = DateTime.tryParse(a['realizadaEm'] ?? '') ?? DateTime(0);
+      final dataB = DateTime.tryParse(b['realizadaEm'] ?? '') ?? DateTime(0);
+      return dataB.compareTo(dataA);
+    });
+
+    return lista;
+  }
 }

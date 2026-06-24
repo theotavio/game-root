@@ -55,19 +55,20 @@ class VendaProvedor extends ChangeNotifier{
       notifyListeners();
       return false;
     }
-
     finalizandoVenda = true;
     notifyListeners();
+
     try{
-      final posicao = await _localizacaoServico.obterPosicaoAtual();
+      final resultado = await _localizacaoServico.obterPosicaoEEndereco();
       final venda = VendaModelo(
         id: const Uuid().v4(),
         clienteId: clienteSelecionado!.id,
         nomeCliente: clienteSelecionado!.nome,
         vendedorId: vendedorId,
         itens: List.of(itensCarrinho),
-        latitude: posicao.latitude,
-        longitude: posicao.longitude,
+        latitude: resultado.posicao.latitude,
+        longitude: resultado.posicao.longitude,
+        enderecoAproximado: resultado.endereco,
       );
       await _firestoreServico.registrarVenda(venda);
       cancelarVenda();

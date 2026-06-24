@@ -106,18 +106,26 @@ class _TelaFormularioClienteState extends State<TelaFormularioCliente>{
                 validator: Validadores.validarDataNascimento,
               ),
               const SizedBox(height: 12),
-              CampoTextoPersonalizado(
-                controlador: _cpfControlador,
-                rotulo: 'CPF',
-                tipoTeclado: TextInputType.number,
-                validador: Validadores.validarCpf,
+              TextFormField(
+                controller: _cpfControlador,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'CPF'),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  _CpfFormatter(),
+                ],
+                validator: Validadores.validarCpf,
               ),
               const SizedBox(height: 12),
-              CampoTextoPersonalizado(
-                controlador: _telefoneControlador,
-                rotulo: 'Telefone',
-                tipoTeclado: TextInputType.phone,
-                validador: Validadores.validarTelefone,
+              TextFormField(
+                controller: _telefoneControlador,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Telefone'),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  _TelefoneFormatter(),
+                ],
+                validator: Validadores.validarTelefone,
               ),
               const SizedBox(height: 12),
               CampoTextoPersonalizado(
@@ -140,14 +148,59 @@ class _TelaFormularioClienteState extends State<TelaFormularioCliente>{
   }
 }
 
-class _DataNascimentoFormatter extends TextInputFormatter {
+class _DataNascimentoFormatter extends TextInputFormatter{
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue anterior, TextEditingValue novo) {
+      TextEditingValue anterior, TextEditingValue novo){
     final digitos = novo.text.replaceAll(RegExp(r'\D'), '');
     final buffer = StringBuffer();
-    for (int i = 0; i < digitos.length && i < 8; i++) {
-      if (i == 2 || i == 4) buffer.write('/');
+    for(int i = 0; i < digitos.length && i < 8; i++){
+      if (i == 2 || i == 4) 
+        buffer.write('/');
+      buffer.write(digitos[i]);
+    }
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
+}
+
+class _CpfFormatter extends TextInputFormatter{
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue anterior, TextEditingValue novo){
+    final digitos = novo.text.replaceAll(RegExp(r'\D'), '');
+    final buffer = StringBuffer();
+    for(int i = 0; i < digitos.length && i < 11; i++){
+      if(i == 3 || i == 6) 
+        buffer.write('.');
+      if(i == 9) 
+        buffer.write('-');
+      buffer.write(digitos[i]);
+    }
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
+}
+
+class _TelefoneFormatter extends TextInputFormatter{
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue anterior, TextEditingValue novo){
+    final digitos = novo.text.replaceAll(RegExp(r'\D'), '');
+    final buffer = StringBuffer();
+    for(int i = 0; i < digitos.length && i < 11; i++){
+      if(i == 0) 
+        buffer.write('(');
+      if(i == 2) 
+        buffer.write(') ');
+      if(i == 7) 
+        buffer.write('-');
       buffer.write(digitos[i]);
     }
     final texto = buffer.toString();
