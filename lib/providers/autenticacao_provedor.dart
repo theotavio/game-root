@@ -16,12 +16,12 @@ class AutenticacaoProvedor extends ChangeNotifier{
   bool carregando = false;
   String? mensagemErro;
 
-  Future<bool> entrarComUsuarioESenha(String usuario, String senha) async{
+  Future<bool> entrarComEmailESenha(String email, String senha) async{
     _iniciarCarregamento();
 
     try{
-      final credencial = await _autenticacaoServico.entrarComUsuarioESenha(
-        nomeUsuario: usuario,
+      final credencial = await _autenticacaoServico.entrarComEmailESenha(
+        email: email.trim(),
         senha: senha,
       );
       await _carregarVendedor(credencial.user!.uid);
@@ -29,7 +29,7 @@ class AutenticacaoProvedor extends ChangeNotifier{
     }on FirebaseAuthException catch (e){
       mensagemErro = _traduzirErroFirebase(e.code);
       return false;
-    }catch(e){
+    }catch (e){
       mensagemErro = e.toString();
       return false;
     }finally{
@@ -54,7 +54,7 @@ class AutenticacaoProvedor extends ChangeNotifier{
 
     final usuario = _autenticacaoServico.usuarioAtual;
     if(usuario == null){
-      mensagemErro = 'Faça login com usuário e senha ao menos uma vez antes de usar a biometria';
+      mensagemErro = 'Faça login com e-mail e senha ao menos uma vez antes de usar a biometria';
       notifyListeners();
       return false;
     }
@@ -65,7 +65,6 @@ class AutenticacaoProvedor extends ChangeNotifier{
   }
 
   Future<bool> cadastrarVendedor({
-    required String nomeUsuario,
     required String nome,
     required String email,
     required String telefone,
@@ -75,17 +74,19 @@ class AutenticacaoProvedor extends ChangeNotifier{
     _iniciarCarregamento();
 
     try{
-      final credencial = await _autenticacaoServico.cadastrarVendedor(email: email, senha: senha);
+      final credencial = await _autenticacaoServico.cadastrarVendedor(
+        email: email,
+        senha: senha,
+      );
       vendedorLogado = await _firestoreServico.criarVendedor(
         uidAuth: credencial.user!.uid,
-        nomeUsuario: nomeUsuario,
         nome: nome,
         email: email,
         telefone: telefone,
         nivel: nivel,
       );
       return true;
-    }on FirebaseAuthException catch(e){
+    }on FirebaseAuthException catch (e){
       mensagemErro = _traduzirErroFirebase(e.code);
       return false;
     }finally{
@@ -93,13 +94,13 @@ class AutenticacaoProvedor extends ChangeNotifier{
     }
   }
 
-  Future<bool> enviarRecuperacaoSenha(String usuarioOuEmail) async{
+  Future<bool> enviarRecuperacaoSenha(String email) async{
     _iniciarCarregamento();
 
     try{
-      await _autenticacaoServico.enviarEmailRecuperacaoSenha(usuarioOuEmail);
+      await _autenticacaoServico.enviarEmailRecuperacaoSenha(email.trim());
       return true;
-    } catch(e){
+    }catch (e){
       mensagemErro = e.toString();
       return false;
     }finally{
@@ -110,11 +111,10 @@ class AutenticacaoProvedor extends ChangeNotifier{
   Future<void> alternarLoginBiometrico(bool ativo) async{
     if(vendedorLogado == null) 
       return;
-    
+      
     final uid = _autenticacaoServico.usuarioAtual?.uid;
-    if(uid == null)
+    if(uid == null) 
       return;
-    
     await _preferenciasServico.definirBiometriaAtiva(ativo);
     await _firestoreServico.atualizarPreferenciaBiometria(uid, ativo);
     vendedorLogado = vendedorLogado!.copiarCom(loginBiometricoAtivo: ativo);
@@ -147,9 +147,11 @@ class AutenticacaoProvedor extends ChangeNotifier{
       case 'user-not-found':
       case 'wrong-password':
       case 'invalid-credential':
-        return 'Usuário ou senha incorretos';
+        return 'E-mail ou senha incorretos';
       case 'email-already-in-use':
         return 'Já existe um vendedor com este e-mail';
+      case 'invalid-email':
+        return 'E-mail inválido';
       case 'weak-password':
         return 'Senha muito fraca';
       default:

@@ -16,7 +16,7 @@ class TelaLogin extends StatefulWidget{
 
 class _TelaLoginState extends State<TelaLogin>{
   final _formKey = GlobalKey<FormState>();
-  final _usuarioControlador = TextEditingController();
+  final _emailControlador = TextEditingController();
   final _senhaControlador = TextEditingController();
   bool _senhaVisivel = false;
   bool _biometriaAtiva = false;
@@ -32,9 +32,10 @@ class _TelaLoginState extends State<TelaLogin>{
   Future<void> _entrar() async{
     if(!_formKey.currentState!.validate()) 
       return;
+
     final provedor = context.read<AutenticacaoProvedor>();
-    final sucesso = await provedor.entrarComUsuarioESenha(
-      _usuarioControlador.text.trim(),
+    final sucesso = await provedor.entrarComEmailESenha(
+      _emailControlador.text.trim(),
       _senhaControlador.text,
     );
     if(!mounted) 
@@ -50,7 +51,7 @@ class _TelaLoginState extends State<TelaLogin>{
   Future<void> _entrarComBiometria() async{
     final provedor = context.read<AutenticacaoProvedor>();
     final sucesso = await provedor.entrarComBiometria();
-    if(!mounted)
+    if(!mounted) 
       return;
     if(sucesso)
       Navigator.of(context).pushReplacementNamed(RotasApp.inicial);
@@ -60,6 +61,13 @@ class _TelaLoginState extends State<TelaLogin>{
             content:
                 Text(provedor.mensagemErro ?? 'Não foi possível autenticar')),
       );
+  }
+
+  @override
+  void dispose(){
+    _emailControlador.dispose();
+    _senhaControlador.dispose();
+    super.dispose();
   }
 
   @override
@@ -78,13 +86,14 @@ class _TelaLoginState extends State<TelaLogin>{
                 Text('Bem-vindo de volta',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 4),
-                Text('Entre com seu usuário e senha',
+                Text('Entre com seu e-mail e senha',
                     style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 32),
                 CampoTextoPersonalizado(
-                  controlador: _usuarioControlador,
-                  rotulo: 'Usuário',
-                  validador: (v) => Validadores.validarCampoObrigatorio(v, mensagem: 'Informe o usuário'),
+                  controlador: _emailControlador,
+                  rotulo: 'E-mail',
+                  tipoTeclado: TextInputType.emailAddress,
+                  validador: Validadores.validarEmail,
                 ),
                 const SizedBox(height: 16),
                 CampoTextoPersonalizado(

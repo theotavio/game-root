@@ -47,9 +47,7 @@ class FirestoreServico{
     return produto;
   }
 
-  Future<void> atualizarProduto(ProdutoModelo produto){
-    return _produtos.doc(produto.codigo).update(produto.paraMapa());
-  }
+  Future<void> atualizarProduto(ProdutoModelo produto) => _produtos.doc(produto.codigo).update(produto.paraMapa());
 
   Future<void> excluirProduto(String codigo) => _produtos.doc(codigo).delete();
 
@@ -59,7 +57,6 @@ class FirestoreServico{
 
   Future<void> darBaixaEstoque(String codigoProduto, int quantidadeVendida) async{
     final ref = _produtos.doc(codigoProduto);
-
     await _db.runTransaction((transacao) async{
       final doc = await transacao.get(ref);
       final estoqueAtual = (doc.data() as Map<String, dynamic>)['quantidadeEstoque'] as int;
@@ -102,9 +99,7 @@ class FirestoreServico{
     return cliente;
   }
 
-  Future<void> atualizarCliente(ClienteModelo cliente){
-    return _clientes.doc(cliente.id).update(cliente.paraMapa());
-  }
+  Future<void> atualizarCliente(ClienteModelo cliente) => _clientes.doc(cliente.id).update(cliente.paraMapa());
 
   Future<void> excluirCliente(String id) => _clientes.doc(id).delete();
 
@@ -114,7 +109,6 @@ class FirestoreServico{
 
   Future<VendedorModelo> criarVendedor({
     required String uidAuth,
-    required String nomeUsuario,
     required String nome,
     required String email,
     required String telefone,
@@ -128,14 +122,13 @@ class FirestoreServico{
       telefone: telefone,
       nivel: nivel,
     );
-    final mapa = vendedor.paraMapa()..['nomeUsuario'] = nomeUsuario.trim().toLowerCase();
-    await _vendedores.doc(uidAuth).set(mapa);
+    await _vendedores.doc(uidAuth).set(vendedor.paraMapa());
     return vendedor;
   }
 
   Future<VendedorModelo?> buscarVendedorPorUid(String uid) async{
     final doc = await _vendedores.doc(uid).get();
-    
+
     if(!doc.exists) 
       return null;
     return VendedorModelo.deMapa(doc.data() as Map<String, dynamic>);
@@ -147,7 +140,6 @@ class FirestoreServico{
 
   Future<void> registrarVenda(VendaModelo venda) async{
     await _vendas.doc(venda.id).set(venda.paraMapa());
-
     for(final item in venda.itens)
       await darBaixaEstoque(item.produto.codigo, item.quantidade);
   }

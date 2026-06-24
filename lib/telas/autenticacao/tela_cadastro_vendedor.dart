@@ -16,26 +16,33 @@ class TelaCadastroVendedor extends StatefulWidget{
 
 class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
   final _formKey = GlobalKey<FormState>();
-  final _nomeUsuarioControlador = TextEditingController();
   final _nomeControlador = TextEditingController();
   final _emailControlador = TextEditingController();
   final _telefoneControlador = TextEditingController();
   final _senhaControlador = TextEditingController();
   NivelVendedor _nivelSelecionado = NivelVendedor.b;
 
+  @override
+  void dispose(){
+    _nomeControlador.dispose();
+    _emailControlador.dispose();
+    _telefoneControlador.dispose();
+    _senhaControlador.dispose();
+    super.dispose();
+  }
+
   Future<void> _cadastrar() async{
     if(!_formKey.currentState!.validate()) 
       return;
-
     final provedor = context.read<AutenticacaoProvedor>();
     final sucesso = await provedor.cadastrarVendedor(
-      nomeUsuario: _nomeUsuarioControlador.text.trim(),
       nome: _nomeControlador.text.trim(),
       email: _emailControlador.text.trim(),
       telefone: _telefoneControlador.text.trim(),
       senha: _senhaControlador.text,
       nivel: _nivelSelecionado,
     );
+
     if(!mounted) 
       return;
     if(sucesso)
@@ -58,12 +65,6 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
             key: _formKey,
             child: ListView(
               children: [
-                CampoTextoPersonalizado(
-                  controlador: _nomeUsuarioControlador,
-                  rotulo: 'Nome de usuário',
-                  validador: (v) => Validadores.validarCampoObrigatorio(v, mensagem: 'Informe um usuário'),
-                ),
-                const SizedBox(height: 16),
                 CampoTextoPersonalizado(
                   controlador: _nomeControlador,
                   rotulo: 'Nome completo',
@@ -94,10 +95,8 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
                 DropdownButtonFormField<NivelVendedor>(
                   initialValue: _nivelSelecionado,
                   decoration: const InputDecoration(labelText: 'Nível do vendedor'),
-                  items: NivelVendedor.values
-                      .map((n) => DropdownMenuItem(
-                          value: n, child: Text('Nível ${n.rotulo}')))
-                      .toList(),
+                  items: NivelVendedor.values.map((n) => DropdownMenuItem(
+                          value: n, child: Text('Nível ${n.rotulo}'))).toList(),
                   onChanged: (v) => setState(() => _nivelSelecionado = v!),
                 ),
                 const SizedBox(height: 24),

@@ -14,14 +14,20 @@ class TelaRecuperarSenha extends StatefulWidget{
 
 class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha>{
   final _formKey = GlobalKey<FormState>();
-  final _controlador = TextEditingController();
+  final _emailControlador = TextEditingController();
+
+  @override
+  void dispose(){
+    _emailControlador.dispose();
+    super.dispose();
+  }
 
   Future<void> _enviar() async{
     if(!_formKey.currentState!.validate()) 
       return;
-
     final provedor = context.read<AutenticacaoProvedor>();
-    final sucesso = await provedor.enviarRecuperacaoSenha(_controlador.text.trim());
+    final sucesso = await provedor.enviarRecuperacaoSenha(_emailControlador.text.trim());
+
     if(!mounted) 
       return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -45,17 +51,19 @@ class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Informe seu usuário ou e-mail cadastrado. Enviaremos um link para redefinir sua senha.'),
+              const Text('Informe seu e-mail cadastrado. Enviaremos um link para redefinir sua senha.'),
               const SizedBox(height: 24),
               CampoTextoPersonalizado(
-                controlador: _controlador,
-                rotulo: 'Usuário ou e-mail',
-                validador: (v) => Validadores.validarCampoObrigatorio(
-                    v, mensagem: 'Informe o usuário ou e-mail'),
+                controlador: _emailControlador,
+                rotulo: 'E-mail',
+                tipoTeclado: TextInputType.emailAddress,
+                validador: Validadores.validarEmail,
               ),
               const SizedBox(height: 24),
               BotaoPersonalizado(
-                  texto: 'Enviar', carregando: carregando, aoPressionar: _enviar),
+                  texto: 'Enviar',
+                  carregando: carregando,
+                  aoPressionar: _enviar),
             ],
           ),
         ),
