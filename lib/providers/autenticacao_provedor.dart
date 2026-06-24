@@ -78,13 +78,15 @@ class AutenticacaoProvedor extends ChangeNotifier{
         email: email,
         senha: senha,
       );
-      vendedorLogado = await _firestoreServico.criarVendedor(
+      await _firestoreServico.criarVendedor(
         uidAuth: credencial.user!.uid,
         nome: nome,
         email: email,
         telefone: telefone,
         nivel: nivel,
       );
+      await _autenticacaoServico.sair();
+      vendedorLogado = null;
       return true;
     }on FirebaseAuthException catch (e){
       mensagemErro = _traduzirErroFirebase(e.code);
@@ -129,6 +131,7 @@ class AutenticacaoProvedor extends ChangeNotifier{
 
   Future<void> _carregarVendedor(String uid) async{
     vendedorLogado = await _firestoreServico.buscarVendedorPorUid(uid);
+    notifyListeners();
   }
 
   void _iniciarCarregamento(){
