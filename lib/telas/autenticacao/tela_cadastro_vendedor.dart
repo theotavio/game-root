@@ -46,7 +46,7 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
     if(!mounted) 
       return;
     if(sucesso)
-      Navigator.of(context).pushReplacementNamed(RotasApp.inicial);
+      Navigator.of(context).pushReplacementNamed(RotasApp.login);
     else
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(provedor.mensagemErro ?? 'Erro ao cadastrar')),

@@ -72,37 +72,14 @@ class Validadores{
   }
 
   static String? validarCpf(String? valor){
-    if(valor == null || valor.trim().isEmpty)
-      return 'Informe o CPF';
-    
-    final cpf = valor.replaceAll(RegExp(r'\D'), '');
-    if(cpf.length < 11)
-      return 'CPF deve ter 11 dígitos';
-    if(RegExp(r'^(\d)\1{10}$').hasMatch(cpf))
-      return 'CPF inválido';
-    
-    final numeros = cpf.split('').map(int.parse).toList();
+  if(valor == null || valor.trim().isEmpty) 
+    return 'Informe o CPF';
 
-    int calcularDigito(List<int> base){
-      int soma = 0;
-      int peso = base.length + 1;
-
-      for(final n in base){
-        soma += n * peso;
-        peso--;
-      }
-
-      final resto = soma % 11;
-      
-      return resto < 2 ? 0 : 11 - resto;
-    }
-
-    final d1 = calcularDigito(numeros.sublist(0,9));
-    final d2 = calcularDigito(numeros.sublist(0,10));
-    if(d1 != numeros[9] || d2 != numeros[10])
-      return 'CPF inválido';
-    return null;
-  }
+  final cpf = valor.replaceAll(RegExp(r'\D'), '');
+  if(cpf.length != 11) 
+    return 'CPF deve ter 11 dígitos';
+  return null;
+}
 
   static String? validarCampoObrigatorio(String? valor, {String mensagem = 'Campo obrigatório'}){
     if(valor == null || valor.trim().isEmpty)

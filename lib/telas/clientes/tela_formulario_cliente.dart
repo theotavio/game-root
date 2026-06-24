@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../models/cliente_modelo.dart';
 import '../../core/utils/validadores.dart';
@@ -30,11 +31,20 @@ class _TelaFormularioClienteState extends State<TelaFormularioCliente>{
     super.initState();
     final c = widget.clienteParaEditar;
     _nomeControlador = TextEditingController(text: c?.nome ?? '');
-    _dataNascimentoControlador =
-        TextEditingController(text: c?.dataNascimento ?? '');
+    _dataNascimentoControlador = TextEditingController(text: c?.dataNascimento ?? '');
     _cpfControlador = TextEditingController(text: c?.cpf ?? '');
     _telefoneControlador = TextEditingController(text: c?.telefone ?? '');
     _emailControlador = TextEditingController(text: c?.email ?? '');
+  }
+
+  @override
+  void dispose(){
+    _nomeControlador.dispose();
+    _dataNascimentoControlador.dispose();
+    _cpfControlador.dispose();
+    _telefoneControlador.dispose();
+    _emailControlador.dispose();
+    super.dispose();
   }
 
   Future<void> _salvar() async{
@@ -42,7 +52,6 @@ class _TelaFormularioClienteState extends State<TelaFormularioCliente>{
       return;
     setState(() => _salvando = true);
     final provedor = context.read<ClienteProvedor>();
-
     try{
       if(_editando){
         final atualizado = widget.clienteParaEditar!.copiarCom(
@@ -62,7 +71,7 @@ class _TelaFormularioClienteState extends State<TelaFormularioCliente>{
           email: _emailControlador.text.trim(),
         );
       }
-      if(mounted)
+      if(mounted) 
         Navigator.of(context).pop();
     }finally{
       if(mounted) 
@@ -86,11 +95,15 @@ class _TelaFormularioClienteState extends State<TelaFormularioCliente>{
                 validador: (v) => Validadores.validarCampoObrigatorio(v, mensagem: 'Informe o nome'),
               ),
               const SizedBox(height: 12),
-              CampoTextoPersonalizado(
-                controlador: _dataNascimentoControlador,
-                rotulo: 'Data de nascimento (DD/MM/AAAA)',
-                tipoTeclado: TextInputType.datetime,
-                validador: Validadores.validarDataNascimento,
+              TextFormField(
+                controller: _dataNascimentoControlador,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Data de nascimento (DD/MM/AAAA)'),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  _DataNascimentoFormatter(),
+                ],
+                validator: Validadores.validarDataNascimento,
               ),
               const SizedBox(height: 12),
               CampoTextoPersonalizado(
@@ -123,6 +136,24 @@ class _TelaFormularioClienteState extends State<TelaFormularioCliente>{
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DataNascimentoFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue anterior, TextEditingValue novo) {
+    final digitos = novo.text.replaceAll(RegExp(r'\D'), '');
+    final buffer = StringBuffer();
+    for (int i = 0; i < digitos.length && i < 8; i++) {
+      if (i == 2 || i == 4) buffer.write('/');
+      buffer.write(digitos[i]);
+    }
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
     );
   }
 }

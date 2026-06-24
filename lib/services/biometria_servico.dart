@@ -4,10 +4,7 @@ class BiometriaServico{
   final LocalAuthentication _auth = LocalAuthentication();
 
   Future<bool> dispositivoSuportaBiometria() async{
-    final suportado = await _auth.isDeviceSupported();
-    final podeChecar = await _auth.canCheckBiometrics;
-
-    return suportado && podeChecar;
+    return await _auth.isDeviceSupported();
   }
 
   Future<List<BiometricType>> tiposDisponiveis(){

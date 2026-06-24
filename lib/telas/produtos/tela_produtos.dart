@@ -13,7 +13,7 @@ class TelaProdutos extends StatelessWidget{
 
   @override
   Widget build(BuildContext context){
-    final vendedor = context.read<AutenticacaoProvedor>().vendedorLogado;
+    final vendedor = context.watch<AutenticacaoProvedor>().vendedorLogado;
     if(vendedor == null || !vendedor.podeGerenciarProdutos)
       return Scaffold(
         appBar: AppBar(title: const Text('Produtos')),
