@@ -100,7 +100,7 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<NivelVendedor>(
-                  value: _nivelSelecionado,
+                  initialValue: _nivelSelecionado,
                   decoration: const InputDecoration(labelText: 'Nível do vendedor'),
                   items: NivelVendedor.values
                       .map((n) => DropdownMenuItem(
