@@ -107,24 +107,23 @@ class FirestoreServico{
     return _clientes.orderBy('nome').snapshots().map((snap) => snap.docs.map((d) => ClienteModelo.deMapa(d.data() as Map<String, dynamic>)).toList());
   }
 
-  Future<VendedorModelo> criarVendedor({
-    required String uidAuth,
-    required String nome,
-    required String email,
-    required String telefone,
-    required NivelVendedor nivel,
-  }) async{
-    final id = await _gerarIdUnico(_vendedores);
-    final vendedor = VendedorModelo(
-      id: id,
-      nome: nome,
-      email: email,
-      telefone: telefone,
-      nivel: nivel,
-    );
-    await _vendedores.doc(uidAuth).set(vendedor.paraMapa());
-    return vendedor;
-  }
+Future<VendedorModelo> criarVendedor({
+  required String uidAuth,
+  required String nome,
+  required String email,
+  required String telefone,
+  required NivelVendedor nivel,
+}) async{
+  final vendedor = VendedorModelo(
+    id: uidAuth, // usa o UID do Firebase Auth diretamente
+    nome: nome,
+    email: email,
+    telefone: telefone,
+    nivel: nivel,
+  );
+  await _vendedores.doc(uidAuth).set(vendedor.paraMapa());
+  return vendedor;
+}
 
   Future<VendedorModelo?> buscarVendedorPorUid(String uid) async{
     final doc = await _vendedores.doc(uid).get();
