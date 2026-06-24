@@ -13,12 +13,20 @@ class TelaProdutos extends StatelessWidget{
 
   @override
   Widget build(BuildContext context){
-    final vendedor = context.watch<AutenticacaoProvedor>().vendedorLogado;
-    if(vendedor == null || !vendedor.podeGerenciarProdutos)
+    final provedor = context.watch<AutenticacaoProvedor>();
+    final vendedor = provedor.vendedorLogado;
+
+    if(vendedor == null)
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+
+    if(!vendedor.podeGerenciarProdutos) 
       return Scaffold(
         appBar: AppBar(title: const Text('Produtos')),
-        body:
-            const Center(child: Text('Apenas vendedores nível A podem acessar esta tela.')),
+        body: const Center(
+          child: Text('Apenas vendedores nível A podem acessar esta tela.'),
+        ),
       );
 
     final produtoProvedor = context.watch<ProdutoProvedor>();
@@ -26,7 +34,8 @@ class TelaProdutos extends StatelessWidget{
     return Scaffold(
       appBar: AppBar(title: const Text('Produtos')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).pushNamed(RotasApp.formularioProduto),
+        onPressed: () =>
+            Navigator.of(context).pushNamed(RotasApp.formularioProduto),
         child: const Icon(Icons.add),
       ),
       body: Column(
@@ -39,13 +48,15 @@ class TelaProdutos extends StatelessWidget{
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: produtoProvedor.produtosFiltrados.length,
-              itemBuilder: (context, indice) {
-                final produto = produtoProvedor.produtosFiltrados[indice];
-                return _CartaoProduto(produto: produto);
-              },
-            ),
+            child: produtoProvedor.produtosFiltrados.isEmpty
+                ? const Center(child: Text('Nenhum produto cadastrado'))
+                : ListView.builder(
+                    itemCount: produtoProvedor.produtosFiltrados.length,
+                    itemBuilder: (context, indice) {
+                      final produto = produtoProvedor.produtosFiltrados[indice];
+                      return _CartaoProduto(produto: produto);
+                    },
+                  ),
           ),
         ],
       ),
@@ -69,16 +80,32 @@ class _CartaoProduto extends StatelessWidget{
                   imageUrl: produto.urlFoto!,
                   width: 48,
                   height: 48,
-                  fit: BoxFit.cover)
+                  fit: BoxFit.cover,
+                  placeholder: (_, _) => Container(
+                    width: 48,
+                    height: 48,
+                    color: Colors.grey.shade200,
+                    child: const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                  errorWidget: (_, _, _) => Container(
+                    width: 48,
+                    height: 48,
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.videogame_asset),
+                  ),
+                )
               : Container(
                   width: 48,
                   height: 48,
                   color: Colors.grey.shade200,
-                  child: const Icon(Icons.videogame_asset)),
+                  child: const Icon(Icons.videogame_asset),
+                ),
         ),
         title: Text(produto.nome),
         subtitle: Text(
-            'Código ${produto.codigo} · Estoque ${produto.quantidadeEstoque} · ${Formatadores.formatarMoeda(produto.valorUnitario)}'),
+          'Código ${produto.codigo} · Estoque ${produto.quantidadeEstoque} · ${Formatadores.formatarMoeda(produto.valorUnitario)}',
+        ),
         trailing: PopupMenuButton<String>(
           onSelected: (opcao) {
             if(opcao == 'editar')
@@ -103,8 +130,9 @@ class _CartaoProduto extends StatelessWidget{
         content: Text('Deseja realmente excluir "${produto.nome}"?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
             onPressed: () {
               context.read<ProdutoProvedor>().excluirProduto(produto.codigo);
