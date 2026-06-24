@@ -7,14 +7,14 @@ import '../../providers/autenticacao_provedor.dart';
 import '../../widgets/campo_texto_personalizado.dart';
 import '../../widgets/botao_personalizado.dart';
 
-class TelaCadastroVendedor extends StatefulWidget{
+class TelaCadastroVendedor extends StatefulWidget {
   const TelaCadastroVendedor({super.key});
 
   @override
   State<TelaCadastroVendedor> createState() => _TelaCadastroVendedorState();
 }
 
-class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
+class _TelaCadastroVendedorState extends State<TelaCadastroVendedor> {
   final _formKey = GlobalKey<FormState>();
   final _nomeControlador = TextEditingController();
   final _emailControlador = TextEditingController();
@@ -23,7 +23,7 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
   NivelVendedor _nivelSelecionado = NivelVendedor.b;
 
   @override
-  void dispose(){
+  void dispose() {
     _nomeControlador.dispose();
     _emailControlador.dispose();
     _telefoneControlador.dispose();
@@ -31,9 +31,9 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
     super.dispose();
   }
 
-  Future<void> _cadastrar() async{
-    if(!_formKey.currentState!.validate()) 
-      return;
+  Future<void> _cadastrar() async {
+    if (!_formKey.currentState!.validate()) return;
+
     final provedor = context.read<AutenticacaoProvedor>();
     final sucesso = await provedor.cadastrarVendedor(
       nome: _nomeControlador.text.trim(),
@@ -43,19 +43,25 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
       nivel: _nivelSelecionado,
     );
 
-    if(!mounted) 
-      return;
-    if(sucesso)
-      Navigator.of(context).pushReplacementNamed(RotasApp.login);
-    else
+    if (!mounted) return;
+
+    if (sucesso) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cadastro realizado! Faça login para continuar.')),
+      );
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(RotasApp.login, (_) => false);
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(provedor.mensagemErro ?? 'Erro ao cadastrar')),
       );
+    }
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     final carregando = context.watch<AutenticacaoProvedor>().carregando;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Cadastro de vendedor')),
       body: SafeArea(
@@ -68,7 +74,8 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
                 CampoTextoPersonalizado(
                   controlador: _nomeControlador,
                   rotulo: 'Nome completo',
-                  validador: (v) => Validadores.validarCampoObrigatorio(v, mensagem: 'Informe o nome'),
+                  validador: (v) =>
+                      Validadores.validarCampoObrigatorio(v, mensagem: 'Informe o nome'),
                 ),
                 const SizedBox(height: 16),
                 CampoTextoPersonalizado(
@@ -93,17 +100,20 @@ class _TelaCadastroVendedorState extends State<TelaCadastroVendedor>{
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<NivelVendedor>(
-                  initialValue: _nivelSelecionado,
+                  value: _nivelSelecionado,
                   decoration: const InputDecoration(labelText: 'Nível do vendedor'),
-                  items: NivelVendedor.values.map((n) => DropdownMenuItem(
-                          value: n, child: Text('Nível ${n.rotulo}'))).toList(),
+                  items: NivelVendedor.values
+                      .map((n) => DropdownMenuItem(
+                          value: n, child: Text('Nível ${n.rotulo}')))
+                      .toList(),
                   onChanged: (v) => setState(() => _nivelSelecionado = v!),
                 ),
                 const SizedBox(height: 24),
                 BotaoPersonalizado(
-                    texto: 'Cadastrar',
-                    carregando: carregando,
-                    aoPressionar: _cadastrar),
+                  texto: 'Cadastrar',
+                  carregando: carregando,
+                  aoPressionar: _cadastrar,
+                ),
               ],
             ),
           ),

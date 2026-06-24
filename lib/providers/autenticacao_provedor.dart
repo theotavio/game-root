@@ -17,7 +17,6 @@ class AutenticacaoProvedor extends ChangeNotifier {
   String? mensagemErro;
 
   AutenticacaoProvedor() {
-    // Escuta mudanças de autenticação automaticamente
     _autenticacaoServico.mudancasDeUsuario.listen((usuario) async {
       if (usuario != null) {
         await _carregarVendedor(usuario.uid);
@@ -31,11 +30,11 @@ class AutenticacaoProvedor extends ChangeNotifier {
   Future<bool> entrarComEmailESenha(String email, String senha) async {
     _iniciarCarregamento();
     try {
-      await _autenticacaoServico.entrarComEmailESenha(
+      final credencial = await _autenticacaoServico.entrarComEmailESenha(
         email: email.trim(),
         senha: senha,
       );
-      // vendedorLogado será preenchido automaticamente pelo listener acima
+      await _carregarVendedor(credencial.user!.uid);
       return true;
     } on FirebaseAuthException catch (e) {
       mensagemErro = _traduzirErroFirebase(e.code);
@@ -63,8 +62,7 @@ class AutenticacaoProvedor extends ChangeNotifier {
     }
     final usuario = _autenticacaoServico.usuarioAtual;
     if (usuario == null) {
-      mensagemErro =
-          'Faça login com e-mail e senha ao menos uma vez antes de usar a biometria';
+      mensagemErro = 'Faça login com e-mail e senha ao menos uma vez antes de usar a biometria';
       notifyListeners();
       return false;
     }
@@ -82,21 +80,27 @@ class AutenticacaoProvedor extends ChangeNotifier {
     _iniciarCarregamento();
     try {
       final credencial = await _autenticacaoServico.cadastrarVendedor(
-        email: email,
+        email: email.trim(),
         senha: senha,
       );
+
       await _firestoreServico.criarVendedor(
         uidAuth: credencial.user!.uid,
         nome: nome,
-        email: email,
+        email: email.trim(),
         telefone: telefone,
         nivel: nivel,
       );
-      // Desloga para forçar login manual após cadastro
+
+      // Desloga para redirecionar ao login
       await _autenticacaoServico.sair();
+      vendedorLogado = null;
       return true;
     } on FirebaseAuthException catch (e) {
       mensagemErro = _traduzirErroFirebase(e.code);
+      return false;
+    } catch (e) {
+      mensagemErro = 'Erro ao cadastrar: ${e.toString()}';
       return false;
     } finally {
       _finalizarCarregamento();
@@ -128,12 +132,17 @@ class AutenticacaoProvedor extends ChangeNotifier {
 
   Future<void> sair() async {
     await _autenticacaoServico.sair();
-    // vendedorLogado = null já é tratado pelo listener
+    vendedorLogado = null;
+    notifyListeners();
   }
 
   Future<void> _carregarVendedor(String uid) async {
-    final vendedor = await _firestoreServico.buscarVendedorPorUid(uid);
-    vendedorLogado = vendedor;
+    try {
+      final vendedor = await _firestoreServico.buscarVendedorPorUid(uid);
+      vendedorLogado = vendedor;
+    } catch (e) {
+      vendedorLogado = null;
+    }
     notifyListeners();
   }
 
