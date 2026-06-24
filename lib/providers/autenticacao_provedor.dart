@@ -6,7 +6,7 @@ import '../services/firestore_servico.dart';
 import '../services/biometria_servico.dart';
 import '../services/preferencias_servico.dart';
 
-class AutenticacaoProvedor extends ChangeNotifier{
+class AutenticacaoProvedor extends ChangeNotifier {
   final AutenticacaoServico _autenticacaoServico = AutenticacaoServico();
   final FirestoreServico _firestoreServico = FirestoreServico();
   final BiometriaServico _biometriaServico = BiometriaServico();
@@ -16,51 +16,59 @@ class AutenticacaoProvedor extends ChangeNotifier{
   bool carregando = false;
   String? mensagemErro;
 
-  Future<bool> entrarComEmailESenha(String email, String senha) async{
-    _iniciarCarregamento();
+  AutenticacaoProvedor() {
+    // Escuta mudanças de autenticação automaticamente
+    _autenticacaoServico.mudancasDeUsuario.listen((usuario) async {
+      if (usuario != null) {
+        await _carregarVendedor(usuario.uid);
+      } else {
+        vendedorLogado = null;
+        notifyListeners();
+      }
+    });
+  }
 
-    try{
-      final credencial = await _autenticacaoServico.entrarComEmailESenha(
+  Future<bool> entrarComEmailESenha(String email, String senha) async {
+    _iniciarCarregamento();
+    try {
+      await _autenticacaoServico.entrarComEmailESenha(
         email: email.trim(),
         senha: senha,
       );
-      await _carregarVendedor(credencial.user!.uid);
+      // vendedorLogado será preenchido automaticamente pelo listener acima
       return true;
-    }on FirebaseAuthException catch (e){
+    } on FirebaseAuthException catch (e) {
       mensagemErro = _traduzirErroFirebase(e.code);
       return false;
-    }catch (e){
+    } catch (e) {
       mensagemErro = e.toString();
       return false;
-    }finally{
+    } finally {
       _finalizarCarregamento();
     }
   }
 
-  Future<bool> entrarComBiometria() async{
+  Future<bool> entrarComBiometria() async {
     final disponivel = await _biometriaServico.dispositivoSuportaBiometria();
-    if(!disponivel){
+    if (!disponivel) {
       mensagemErro = 'Biometria não disponível neste aparelho';
       notifyListeners();
       return false;
     }
-
     final autenticado = await _biometriaServico.autenticar();
-    if(!autenticado){
+    if (!autenticado) {
       mensagemErro = 'Não foi possível confirmar sua identidade';
       notifyListeners();
       return false;
     }
-
     final usuario = _autenticacaoServico.usuarioAtual;
-    if(usuario == null){
-      mensagemErro = 'Faça login com e-mail e senha ao menos uma vez antes de usar a biometria';
+    if (usuario == null) {
+      mensagemErro =
+          'Faça login com e-mail e senha ao menos uma vez antes de usar a biometria';
       notifyListeners();
       return false;
     }
-
     await _carregarVendedor(usuario.uid);
-    notifyListeners();
     return true;
   }
 
@@ -70,10 +78,9 @@ class AutenticacaoProvedor extends ChangeNotifier{
     required String telefone,
     required String senha,
     required NivelVendedor nivel,
-  }) async{
+  }) async {
     _iniciarCarregamento();
-
-    try{
+    try {
       final credencial = await _autenticacaoServico.cadastrarVendedor(
         email: email,
         senha: senha,
@@ -85,68 +92,64 @@ class AutenticacaoProvedor extends ChangeNotifier{
         telefone: telefone,
         nivel: nivel,
       );
+      // Desloga para forçar login manual após cadastro
       await _autenticacaoServico.sair();
-      vendedorLogado = null;
       return true;
-    }on FirebaseAuthException catch (e){
+    } on FirebaseAuthException catch (e) {
       mensagemErro = _traduzirErroFirebase(e.code);
       return false;
-    }finally{
+    } finally {
       _finalizarCarregamento();
     }
   }
 
-  Future<bool> enviarRecuperacaoSenha(String email) async{
+  Future<bool> enviarRecuperacaoSenha(String email) async {
     _iniciarCarregamento();
-
-    try{
+    try {
       await _autenticacaoServico.enviarEmailRecuperacaoSenha(email.trim());
       return true;
-    }catch (e){
+    } catch (e) {
       mensagemErro = e.toString();
       return false;
-    }finally{
+    } finally {
       _finalizarCarregamento();
     }
   }
 
-  Future<void> alternarLoginBiometrico(bool ativo) async{
-    if(vendedorLogado == null) 
-      return;
-      
+  Future<void> alternarLoginBiometrico(bool ativo) async {
+    if (vendedorLogado == null) return;
     final uid = _autenticacaoServico.usuarioAtual?.uid;
-    if(uid == null) 
-      return;
+    if (uid == null) return;
     await _preferenciasServico.definirBiometriaAtiva(ativo);
     await _firestoreServico.atualizarPreferenciaBiometria(uid, ativo);
     vendedorLogado = vendedorLogado!.copiarCom(loginBiometricoAtivo: ativo);
     notifyListeners();
   }
 
-  Future<void> sair() async{
+  Future<void> sair() async {
     await _autenticacaoServico.sair();
-    vendedorLogado = null;
+    // vendedorLogado = null já é tratado pelo listener
+  }
+
+  Future<void> _carregarVendedor(String uid) async {
+    final vendedor = await _firestoreServico.buscarVendedorPorUid(uid);
+    vendedorLogado = vendedor;
     notifyListeners();
   }
 
-  Future<void> _carregarVendedor(String uid) async{
-    vendedorLogado = await _firestoreServico.buscarVendedorPorUid(uid);
-    notifyListeners();
-  }
-
-  void _iniciarCarregamento(){
+  void _iniciarCarregamento() {
     carregando = true;
     mensagemErro = null;
     notifyListeners();
   }
 
-  void _finalizarCarregamento(){
+  void _finalizarCarregamento() {
     carregando = false;
     notifyListeners();
   }
 
-  String _traduzirErroFirebase(String codigo){
-    switch(codigo){
+  String _traduzirErroFirebase(String codigo) {
+    switch (codigo) {
       case 'user-not-found':
       case 'wrong-password':
       case 'invalid-credential':
